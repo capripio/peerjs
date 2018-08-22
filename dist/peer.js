@@ -105,6 +105,7 @@ DataConnection.prototype._handleDataMessage = function(e) {
   var self = this;
   var data = e.data;
   var datatype = data.constructor;
+  util.log(e.data);
   if (this.serialization === 'binary' || this.serialization === 'binary-utf8') {
     if (datatype === Blob) {
       // Datatype should never be blob
@@ -376,11 +377,10 @@ MediaConnection.prototype.answer = function(stream) {
 
 /** Allows user to close connection. */
 MediaConnection.prototype.close = function() {
-  if (!this.open) {
-    return;
+  if (this.open) {
+    this.open = false;
+    Negotiator.cleanup(this);
   }
-  this.open = false;
-  Negotiator.cleanup(this);
   this.emit('close')
 };
 
@@ -536,6 +536,7 @@ Negotiator._setupListeners = function(connection, pc, pc_id) {
   };
 
   pc.oniceconnectionstatechange = function() {
+    console.log("State: "+pc.iceConnectionState);
     switch (pc.iceConnectionState) {
       case "failed":
         util.log(
